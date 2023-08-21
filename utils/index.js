@@ -1,7 +1,6 @@
-const nodemailer = require('nodemailer');
 const moment = require('moment');
-const mysql = require('../models/mysqlConnect')
-const escapeHTML = (str) => {
+
+exports.escapeHTML = (str) => {
     if (str === undefined || str === null) {
         return str;
     }
@@ -33,7 +32,10 @@ const escapeHTML = (str) => {
     }
     return str;
 }
-exports.escapeHTML = escapeHTML;
+
+exports.isEmpty = (value) => {
+    return value === undefined || value === null || value === "" || (typeof(value) === "object" && Object.keys(value).length == 0);
+}
 
 exports.escapeHTMLMiddleware = (req, res, next) => {
     req.body = escapeHTML(req.body);
@@ -41,3 +43,8 @@ exports.escapeHTMLMiddleware = (req, res, next) => {
     req.params = escapeHTML(req.params);
     next();
 }
+
+exports.getCurrentFormatedDate = () => {
+    return moment(new Date()).format("yyyy-MM-DD HH:mm:ss");
+}
+

@@ -1,19 +1,25 @@
 const mysql = require('mysql');
-const isEmpty = require('../utils/isEmpty');
+const { isEmpty } = require('../utils');
 const { mysqlConnect } = require('../config');
 
-const connection = mysql.createConnection({
-    host: mysqlConnect.host,
-    port: mysqlConnect.port,
-    user: mysqlConnect.user,
-    password: mysqlConnect.password,
-    database: mysqlConnect.database,
-    multipleStatements: true,
-});
-
 const query = (sql) => {
+    const connection = mysql.createConnection({
+        host: mysqlConnect.host,
+        port: mysqlConnect.port,
+        user: mysqlConnect.user,
+        password: mysqlConnect.password,
+        database: mysqlConnect.database,
+        multipleStatements: true,
+    });
     return new Promise((resolve, reject) => {
         if (isEmpty(sql)) {
+            connection.connect(function (err) {
+                if (err) {
+                    console.log("Db connection failed", err);
+                    throw err;
+                }
+                console.log("Db connection successful");
+            })
             return resolve();
         }
         connection.query(sql, (err, results, fields) => {
@@ -51,6 +57,7 @@ const getInsertQuery = (table, params) => {
 const insertOne = (table, params) => {
     return new Promise((resolve, reject) => {
         let insertQuery = getInsertQuery(table, params);
+        console.log('insertQuery :>> ', insertQuery);
         query(insertQuery).then(({ insertId }) => {
             query(`select * from ${table} where id = ${insertId}`).then(([item]) => {
                 resolve(item);
@@ -235,4 +242,4 @@ const select = (table, conds, extra = {}) => {
     })
 }
 
-module.exports = {connection, query, selectQuery, select, getInsertQuery, insertOne, insertManyQuery, insertMany, updateQuery, update, updateOne, deleteManyQuery, deleteMany };
+module.exports = { query, selectQuery, select, getInsertQuery, insertOne, insertManyQuery, insertMany, updateQuery, update, updateOne, deleteManyQuery, deleteMany };
