@@ -1,9 +1,9 @@
-const mysql = require('mysql');
+var mysql = require('mysql');
 const { isEmpty } = require('../utils');
 const { mysqlConnect } = require('../config');
 
 const query = (sql) => {
-    const connection = mysql.createConnection({
+    var pool = mysql.createPool({
         host: mysqlConnect.host,
         port: mysqlConnect.port,
         user: mysqlConnect.user,
@@ -11,28 +11,26 @@ const query = (sql) => {
         database: mysqlConnect.database,
         multipleStatements: true,
     });
+
     return new Promise((resolve, reject) => {
-        if (isEmpty(sql)) {
-            connection.connect(function (err) {
-                if (err) {
-                    console.log("Db connection failed", err);
-                    throw err;
-                }
-                console.log("Db connection successful");
-            })
-            return resolve();
-        }
-        connection.query(sql, (err, results, fields) => {
+        pool.getConnection(function (err, connection) {
             if (err) {
                 reject(err);
                 return;
             }
-            resolve(results);
-            connection.end();
-            return;
+
+            connection.query(sql, (err, results, fields) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                connection.release();
+                resolve(results);
+            });
         });
     });
-}
+};
 
 const getInsertQuery = (table, params) => {
     let insertQuery = `insert into ${table} (`;

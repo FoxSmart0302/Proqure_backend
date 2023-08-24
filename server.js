@@ -23,7 +23,15 @@ app.use(function (req, res, next) {
 });
 
 // db connection check
-query();
+query('SELECT * from tbl_users')
+    .then(result => {
+        console.log("Db connection successful");
+    })
+    .catch(err => {
+        console.log("Db connection failed", err);
+        throw(err);
+        return;
+    })
 
 app.use('/api/items', items);
 app.use('/api/payment', payment);
