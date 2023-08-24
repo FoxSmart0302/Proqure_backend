@@ -7,10 +7,10 @@ require("dotenv").config();
 app.use(cors());
 const PORT = process.env.PORT || 5005
 
-const items = require("./routes/items");
 const payment = require("./routes/payment");
 const user = require("./routes/user");
 const category = require('./routes/category');
+const item = require('./routes/item');
 // middlewares
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -33,9 +33,9 @@ query('SELECT * from tbl_users')
         return;
     })
 
-app.use('/api/items', items);
 app.use('/api/payment', payment);
 app.use('/api/user', user);
 app.use('/api/category', category);
+app.use('/api/item', item);
 
 app.listen(PORT, console.log("Server is running on port ", PORT))

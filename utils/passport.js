@@ -18,7 +18,6 @@ passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
     //     return done(err, false);
     // })
     mysql.select("tbl_users", {id: jwt_payload.id, deleted_at: null}).then(([user]) => {
-        console.log('passportauthentication :>> ', user.id);
         if (!user) return done(err, false);
         return done(null, user);
     }).catch(err => {

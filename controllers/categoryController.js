@@ -23,8 +23,7 @@ exports.categorylist = (req, res) => {
 }
 
 exports.item = (req, res) => {
-    console.log('req.body :>> ', req.body);
-    mysql.query(`SELECT * from tbl_catitems WHERE id='${req.body.id}'`).then(result => {
+    mysql.query(`SELECT * from tbl_products WHERE id='${req.body.id}'`).then(result => {
         return res.json({
             status: 0,
             result,
@@ -38,8 +37,7 @@ exports.item = (req, res) => {
 }
 
 exports.related = (req, res) => {
-    console.log('req.body :>> ', req.body);
-    mysql.query(`SELECT * from tbl_catitems WHERE cat_id='${req.body.cat_id}'`).then(list => {
+    mysql.query(`SELECT * from tbl_products WHERE cat_id='${req.body.cat_id}'`).then(list => {
         return res.json({
             status: 0,
             list,
@@ -54,7 +52,7 @@ exports.related = (req, res) => {
 
 
 exports.itemlist = (req, res) => {
-    mysql.query('SELECT tbl_catitems.* from tbl_categories JOIN  tbl_catitems ON tbl_categories.id = tbl_catitems.cat_id ORDER BY tbl_categories.id;SELECT * from tbl_categories ORDER BY id ASC').then(([list, clist]) => {
+    mysql.query('SELECT tbl_products.* from tbl_categories JOIN  tbl_products ON tbl_categories.id = tbl_products.cat_id ORDER BY tbl_categories.id;SELECT * from tbl_categories ORDER BY id ASC').then(([list, clist]) => {
         // console.log('object :>> ', JSON.stringify(list));
         const sortedArray = list.reduce((acc, curr) => {
             const foundIndex = acc.findIndex(item => item.cat_id === curr.cat_id);
