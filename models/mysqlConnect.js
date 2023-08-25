@@ -69,6 +69,7 @@ const insertOne = (table, params) => {
 }
 
 const insertManyQuery = (table, params) => {
+    console.log('table :>> ', table);
     let insertQuery = '';
     params.forEach(param => {
         insertQuery += getInsertQuery(table, param);

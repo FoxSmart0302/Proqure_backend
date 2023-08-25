@@ -8,7 +8,7 @@ const User = require('../models/User');
 const { isEmpty, getCurrentFormatedDate } = require('../utils');
 
 exports.categorylist = (req, res) => {
-    mysql.query('SELECT * FROM `tbl_categories`').then(list => {
+    mysql.query('SELECT * FROM `tbl_categories`;').then(list => {
         return res.json({
             status: 0,
             list,
@@ -23,7 +23,7 @@ exports.categorylist = (req, res) => {
 }
 
 exports.item = (req, res) => {
-    mysql.query(`SELECT * from tbl_products WHERE id='${req.body.id}'`).then(result => {
+    mysql.query(`SELECT * from tbl_products WHERE id='${req.body.id}';`).then(result => {
         return res.json({
             status: 0,
             result,
@@ -52,7 +52,7 @@ exports.related = (req, res) => {
 
 
 exports.itemlist = (req, res) => {
-    mysql.query('SELECT tbl_products.* from tbl_categories JOIN  tbl_products ON tbl_categories.id = tbl_products.cat_id ORDER BY tbl_categories.id;SELECT * from tbl_categories ORDER BY id ASC').then(([list, clist]) => {
+    mysql.query('SELECT tbl_products.* from tbl_categories JOIN  tbl_products ON tbl_categories.id = tbl_products.cat_id ORDER BY tbl_categories.id;SELECT * from tbl_categories ORDER BY id ASC;').then(([list, clist]) => {
         // console.log('object :>> ', JSON.stringify(list));
         const sortedArray = list.reduce((acc, curr) => {
             const foundIndex = acc.findIndex(item => item.cat_id === curr.cat_id);
@@ -66,6 +66,7 @@ exports.itemlist = (req, res) => {
         return res.json({
             status: 0,
             list,
+            clist,
             sortedArray,
         })
     }).catch(err => {
