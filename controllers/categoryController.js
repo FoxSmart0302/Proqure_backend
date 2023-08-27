@@ -50,10 +50,17 @@ exports.related = (req, res) => {
     })
 }
 
-
 exports.itemlist = (req, res) => {
-    mysql.query('SELECT tbl_products.* from tbl_categories JOIN  tbl_products ON tbl_categories.id = tbl_products.cat_id ORDER BY tbl_categories.id;SELECT * from tbl_categories ORDER BY id ASC;').then(([list, clist]) => {
-        // console.log('object :>> ', JSON.stringify(list));
+    console.log("==============itemList:", req.body);
+    let data = req.data;
+    let { user_id, user_email } = req.body;
+    let sql = `SELECT tbl_products.* from tbl_categories JOIN  tbl_products ON tbl_categories.id = tbl_products.cat_id ORDER BY tbl_categories.id;`;
+    sql += `SELECT * from tbl_categories ORDER BY id ASC;`;
+    sql += `SELECT w.id, user_id, product_id, cat_name, name, price, image, description, details,created_at FROM tbl_wish as w INNER JOIN tbl_products as p ON w.product_id = p.id WHERE w.user_id='${user_id}';`;
+    sql += `SELECT c.id, user_id, product_id, cat_name, name, price, image, description, details, quantity,created_at FROM tbl_cart as c INNER JOIN tbl_products as p ON c.product_id = p.id WHERE c.user_id='${user_id}';;`;
+    console.log("=======sql", sql);
+
+    mysql.query(sql).then(([list, clist, wishlist, cartlist]) => {
         const sortedArray = list.reduce((acc, curr) => {
             const foundIndex = acc.findIndex(item => item.cat_id === curr.cat_id);
             if (foundIndex !== -1) {
@@ -67,6 +74,8 @@ exports.itemlist = (req, res) => {
             status: 0,
             list,
             clist,
+            wishlist,
+            cartlist,
             sortedArray,
         })
     }).catch(err => {
