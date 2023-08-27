@@ -186,7 +186,7 @@ exports.addtobagitem = (req, res) => {
             message = "Successfully added";
         }else{
             tempQuery = `UPDATE tbl_cart SET quantity='${quantity}' WHERE user_id='${user_id}' and product_id='${product_id}';`;
-            message = "Successfully changed";
+            message = "Successfully updated";
         }
         let selectQuery = `SELECT c.id, user_id, product_id, cat_name, name, price, image, description, details, quantity ,created_at FROM tbl_cart as c INNER JOIN tbl_products as p ON c.product_id = p.id WHERE c.user_id='${user_id}';`;
         mysql.query(`${tempQuery}${selectQuery}`).then(result => {
