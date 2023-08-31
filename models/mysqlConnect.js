@@ -25,7 +25,6 @@ const query = (sql) => {
             }
 
             connection.query(sql, (err, results, fields) => {
-                console.log("mysqlerror", err);
                 if (err) {
                     reject(err);
                     return;
@@ -166,7 +165,7 @@ const update = (table, conds, params) => {
         let queryStr = updateQuery(table, conds, params);
         console.log("query: " , queryStr);
         query(queryStr).then(result => {
-            resolve();
+            resolve({success: 0});
         }).catch(err => {
             reject(err);
         })

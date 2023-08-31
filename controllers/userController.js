@@ -31,8 +31,10 @@ const validate = (user, newUser = true) => {
 
 exports.login = (req, res) => {
     let { email, password } = req.body;
-    
-    mysql.select("tbl_users", { email, deleted_at: null }).then(([user]) => {
+
+    let selectQuery = mysql.selectQuery("tbl_users", { email: email, deleted_at: null });
+
+    mysql.query(selectQuery).then(([user]) => {
         if (!user) {
             return res.json({
                 status: 1,
@@ -47,7 +49,7 @@ exports.login = (req, res) => {
             return res.json({
                 status: 0,
                 token,
-                user
+                user,
             })
         }).catch(err => {
             console.log(err);
@@ -66,6 +68,7 @@ exports.login = (req, res) => {
 }
 
 exports.register = (req, res) => {
+    console.log("register", req.body);
     const { isValid, errors } = validate(req.body);
     if (!isValid) {
         return res.json({
@@ -74,7 +77,7 @@ exports.register = (req, res) => {
         });
     }
 
-    let { firstname, lastname, company, phone, email, password } = req.body;
+    let { firstname, lastname, company, phone, email, password, role } = req.body;
 
     User.findByEmail(email).then(user => {
         if (user)
@@ -88,7 +91,7 @@ exports.register = (req, res) => {
 
         const addUser = () => {
             const newUser = {
-                firstname, lastname, company, phone, email, password
+                firstname, lastname, company, phone, email, password, role
             };
             if (uploadPath) {
                 newUser.avatar = filePath;
@@ -151,10 +154,67 @@ exports.register = (req, res) => {
     })
 }
 
+exports.edit = (req, res) => {
+    console.log("editreqbody", req.body);
+    let {id, company, firstname, lastname, phone, email, role } = req.body;
+    let updateQuery = mysql.updateQuery('tbl_users', {id: id}, {company: company, firstname: firstname, lastname: lastname, phone: phone, email: email});
+    let selectQuery = mysql.selectQuery('tbl_users', {deleted_at: null, role: role});
+    mysql.query(`${updateQuery}${selectQuery}`)
+        .then(result => {
+            return res.json({
+                status: 0,
+                message: 'Successfully updated',
+                result
+            })
+        })
+        .catch((err) => {
+            return res.json({
+                status: 1,
+                message: "Please try again later"
+            })
+        })
+}
+
+exports.delete = (req, res) => {
+    console.log("deletebody", req.body);
+    let {id, company, firstname, lastname, phone, email, role } = req.body;
+    let delete_at = getCurrentFormatedDate();
+    let updateQuery = mysql.updateQuery('tbl_users', {id: id}, {deleted_at: delete_at});
+    let selectQuery = mysql.selectQuery('tbl_users', {deleted_at: null, role: role});
+    console.log(updateQuery)
+    mysql.query(`${updateQuery}${selectQuery}`)
+        .then(result => {
+            console.log(result)
+            return res.json({
+                status: 0,
+                message: 'Successfully updated',
+                result
+            })
+        })
+        .catch((err) => {
+            return res.json({
+                status: 1,
+                message: "Please try again later"
+            })
+        })
+}
+
 exports.current = (req, res) => {
     res.json({
         status: 0,
-        user: req.user
+        user: req.user,
+    })
+}
+
+exports.userlist = (req, res) => {
+    let { role } = req.body;
+    console.log(role)
+    let usersQuery = mysql.selectQuery("tbl_users", { deleted_at: null, role: role });
+    mysql.query(usersQuery).then((users) => {
+        res.json({
+            status: 0,
+            users: users,
+        })
     })
 }
 
