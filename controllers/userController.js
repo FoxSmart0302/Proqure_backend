@@ -91,7 +91,7 @@ exports.register = (req, res) => {
 
         const addUser = () => {
             const newUser = {
-                firstname, lastname, company, phone, email, password, role
+                firstname, lastname, company, phone, email, password, role,avatar:"/upload/users/avatar/7.png"
             };
             if (uploadPath) {
                 newUser.avatar = filePath;
@@ -208,8 +208,14 @@ exports.current = (req, res) => {
 
 exports.userlist = (req, res) => {
     let { role } = req.body;
+    let usersQuery;
+    if(role == "all"){
+        usersQuery = mysql.selectQuery("tbl_users", { deleted_at: null });
+    }
+    else{
+        usersQuery = mysql.selectQuery("tbl_users", { deleted_at: null, role: role });
+    }
     console.log(role)
-    let usersQuery = mysql.selectQuery("tbl_users", { deleted_at: null, role: role });
     mysql.query(usersQuery).then((users) => {
         res.json({
             status: 0,

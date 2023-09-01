@@ -2,35 +2,33 @@ var mysql = require('mysql2');
 const { isEmpty } = require('../utils');
 const { mysqlConnect } = require('../config');
 
-const query = (sql) => {
-    var pool = mysql.createPool({
-        host: mysqlConnect.host,
-        user: mysqlConnect.user,
-        database: mysqlConnect.database,
-        waitForConnections: true,
-        connectionLimit: 10,
-        maxIdle: 10, // max idle connections, the default value is the same as `connectionLimit`
-        idleTimeout: 60000, // idle connections timeout, in milliseconds, the default value 60000
-        queueLimit: 0,
-        enableKeepAlive: true,
-        keepAliveInitialDelay: 0,
-        multipleStatements: true,
-    });
+const pool = mysql.createPool({
+    host: mysqlConnect.host,
+    user: mysqlConnect.user,
+    database: mysqlConnect.database,
+    waitForConnections: true,
+    connectionLimit: 10,
+    maxIdle: 10,
+    idleTimeout: 60000,
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0,
+    multipleStatements: true,
+});
 
+const query = (sql) => {
     return new Promise((resolve, reject) => {
         pool.getConnection(function (err, connection) {
             if (err) {
                 reject(err);
                 return;
             }
-
             connection.query(sql, (err, results, fields) => {
                 if (err) {
                     reject(err);
                     return;
                 }
-
-                pool.releaseConnection(connection);
+                connection.release();
                 resolve(results);
             });
         });
