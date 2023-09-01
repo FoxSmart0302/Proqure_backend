@@ -54,7 +54,7 @@ exports.register = (req, res) => {
 
         const addTransporter = () => {
             const newTransporter = {
-                firstname, lastname, company, phone, email, password, avatar:"/upload/users/trans/7.png"
+                firstname, lastname, company, phone, email, password, avatar:"/upload/avatar/trans/7.png"
             };
             if (uploadPath) {
                 newTransporter.avatar = filePath;

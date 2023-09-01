@@ -16,10 +16,12 @@ const payment = require("./routes/payment");
 const item = require('./routes/item');
 const category = require('./routes/category');
 const user = require("./routes/user");
+
 // const vendor = require('./routes/vendor');
 
 // admin 
 const transporter = require("./routes/transporter");
+const product = require('./routes/product');
 
 // middlewares
 app.use(express.json())
@@ -53,6 +55,8 @@ app.use('/api/item', item);
 
 //admin
 app.use('/api/transporter', transporter);
+app.use('/api/product', product)
+
 
 // const server = require('http').createServer(app);
 const httpServer = http.createServer(app);

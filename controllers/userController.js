@@ -68,7 +68,8 @@ exports.login = (req, res) => {
 }
 
 exports.register = (req, res) => {
-    console.log("register", req.body);
+    console.log("userregister", req.body);
+    
     const { isValid, errors } = validate(req.body);
     if (!isValid) {
         return res.json({
@@ -91,7 +92,7 @@ exports.register = (req, res) => {
 
         const addUser = () => {
             const newUser = {
-                firstname, lastname, company, phone, email, password, role,avatar:"/upload/users/avatar/7.png"
+                firstname, lastname, company, phone, email, password, role,avatar:"/upload/avatar/users/7.png"
             };
             if (uploadPath) {
                 newUser.avatar = filePath;
