@@ -18,7 +18,7 @@ exports.addwishitem = (req, res) => {
             })
         }
         let insertQuery = mysql.insertManyQuery('tbl_wish', [findQuery]);
-        let selectQuery = `SELECT w.id, user_id, product_id, cat_name, name, price, image, description, details,created_at FROM tbl_wish as w INNER JOIN tbl_products as p ON w.product_id = p.id WHERE w.user_id='${user_id}';`;
+        let selectQuery = `SELECT w.id, w.user_id, w.product_id,c.name as cat_name, p.name, p.price, p.image, p.description, p.details,p.created_at FROM tbl_wish as w INNER JOIN tbl_products as p ON w.product_id = p.id INNER JOIN tbl_categories as c ON c.id=p.cat_id WHERE w.user_id='${user_id}';`;
         mysql.query(`${insertQuery}${selectQuery}`).then(result => {
             if (!isEmpty(result)) {
                 return res.json({
@@ -52,7 +52,7 @@ exports.removewishitem = (req, res) => {
     let { id: id, user_id: user_id, product_id: product_id } = req.body;
     let deleteQuery = mysql.deleteManyQuery('tbl_wish', { user_id: user_id, product_id: product_id });
     console.log("deleteQuery", deleteQuery);
-    let selectQuery = `SELECT w.id, user_id, product_id, cat_name, name, price, image, description, details, created_at FROM tbl_wish as w INNER JOIN tbl_products as p ON w.product_id = p.id WHERE w.user_id='${user_id}';`;
+    let selectQuery = `SELECT w.id, w.user_id, w.product_id,c.name as cat_name, p.name, p.price, p.image, p.description, p.details,p.created_at FROM tbl_wish as w INNER JOIN tbl_products as p ON w.product_id = p.id INNER JOIN tbl_categories as c ON c.id=p.cat_id WHERE w.user_id='${user_id}';`;
     mysql.query(`${deleteQuery}${selectQuery}`).then((result) => {
         return res.json({
             status: 0,
@@ -92,7 +92,7 @@ exports.addcartitem = (req, res) => {
             })
         }
         let insertQuery = mysql.insertManyQuery('tbl_cart', [temp]);
-        let selectQuery = `SELECT c.id, user_id, product_id, cat_name, name, price, image, description, details, quantity ,created_at FROM tbl_cart as c INNER JOIN tbl_products as p ON c.product_id = p.id WHERE c.user_id='${user_id}';`;
+        let selectQuery = `SELECT ct.id, ct.user_id, ct.product_id,c.name as cat_name, p.name, p.price, p.image, p.description, p.details, ct.quantity, p.created_at FROM tbl_cart as ct INNER JOIN tbl_products as p ON ct.product_id = p.id INNER JOIN tbl_categories as c ON c.id=p.cat_id WHERE ct.user_id='${user_id}';`;
         mysql.query(`${insertQuery}${selectQuery}`).then(result => {
             if (!isEmpty(result)) {
                 return res.json({
@@ -126,7 +126,7 @@ exports.removecartitem = (req, res) => {
     let { id: id, user_id: user_id, product_id: product_id } = req.body;
     let deleteQuery = mysql.deleteManyQuery('tbl_cart', { user_id: user_id, product_id: product_id });
     console.log("deleteQuery", deleteQuery);
-    let selectQuery = `SELECT c.id, user_id, product_id, cat_name, name, price, image, description, details, quantity ,created_at FROM tbl_cart as c INNER JOIN tbl_products as p ON c.product_id = p.id WHERE c.user_id='${user_id}';`;
+    let selectQuery = `SELECT ct.id, ct.user_id, ct.product_id,c.name as cat_name, p.name, p.price, p.image, p.description, p.details, ct.quantity, p.created_at FROM tbl_cart as ct INNER JOIN tbl_products as p ON ct.product_id = p.id INNER JOIN tbl_categories as c ON c.id=p.cat_id WHERE ct.user_id='${user_id}';`;
     mysql.query(`${deleteQuery}${selectQuery}`).then((result) => {
         return res.json({
             status: 0,
@@ -150,7 +150,7 @@ exports.quantitychange = (req, res) => {
     // let updateQuery = mysql.updateQuery('tbl_cart', { id: id }, { quantity: quantity });
     let updateQuery = `UPDATE tbl_cart SET quantity='${quantity}' WHERE id='${id}';`;
     console.log("update query", updateQuery);
-    let selectQuery = `SELECT c.id, user_id, product_id, cat_name, name, price, image, description, details, quantity ,created_at FROM tbl_cart as c INNER JOIN tbl_products as p ON c.product_id = p.id WHERE c.user_id='${user_id}';`;
+    let selectQuery = `SELECT ct.id, ct.user_id, ct.product_id,c.name as cat_name, p.name, p.price, p.image, p.description, p.details, ct.quantity, p.created_at FROM tbl_cart as ct INNER JOIN tbl_products as p ON ct.product_id = p.id INNER JOIN tbl_categories as c ON c.id=p.cat_id WHERE ct.user_id='${user_id}';`;
     mysql.query(`${updateQuery}${selectQuery}`).then(result => {
         return res.json({
             status: 0,
@@ -188,7 +188,7 @@ exports.addtobagitem = (req, res) => {
             tempQuery = `UPDATE tbl_cart SET quantity='${quantity}' WHERE user_id='${user_id}' and product_id='${product_id}';`;
             message = "Successfully updated";
         }
-        let selectQuery = `SELECT c.id, user_id, product_id, cat_name, name, price, image, description, details, quantity ,created_at FROM tbl_cart as c INNER JOIN tbl_products as p ON c.product_id = p.id WHERE c.user_id='${user_id}';`;
+        let selectQuery = `SELECT ct.id, ct.user_id, ct.product_id,c.name as cat_name, p.name, p.price, p.image, p.description, p.details, ct.quantity, p.created_at FROM tbl_cart as ct INNER JOIN tbl_products as p ON ct.product_id = p.id INNER JOIN tbl_categories as c ON c.id=p.cat_id WHERE ct.user_id='${user_id}'`;
         mysql.query(`${tempQuery}${selectQuery}`).then(result => {
             if (!isEmpty(result)) {
                 return res.json({

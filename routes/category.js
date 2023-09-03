@@ -9,4 +9,7 @@ router.post('/itemlist', categoryController.itemlist);
 router.post('/item', categoryController.item);
 router.post('/related', categoryController.related);
 
+router.post('/register', passport.authenticate('jwt', { session: false }), categoryController.register);
+router.post('/edit', passport.authenticate('jwt', { session: false }), categoryController.edit);
+router.post('/delete', passport.authenticate('jwt', { session: false }), categoryController.delete);
 module.exports = router;

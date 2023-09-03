@@ -2,7 +2,7 @@ const mysql = require('./mysqlConnect');
 
 exports.findByEmail = (email) => {
     return new Promise((resolve, inject) => {
-        mysql.query(`select * from tbl_vendor where email = '${email}'`).then(([user]) => {
+        mysql.query(`select * from tbl_categories where email = '${email}'`).then(([user]) => {
             resolve(user);
         }).catch(err => {
             inject(err);
@@ -12,7 +12,7 @@ exports.findByEmail = (email) => {
 
 exports.findById = (id) => {
     return new Promise((resolve, inject) => {
-        mysql.query(`select * from tbl_vendor where id = '${id}'`).then(([user]) => {
+        mysql.query(`select * from tbl_categories where id = '${id}'`).then(([user]) => {
             resolve(user);
         }).catch(err => {
             inject(err);
@@ -20,10 +20,10 @@ exports.findById = (id) => {
     })
 }
 
-exports.register = (newUser) => {
+exports.register = (newCategory) => {
     return new Promise((resolve, reject) => {
-        mysql.insertOne('tbl_vendor', newUser).then(user => {
-            resolve(user)
+        mysql.insertOne('tbl_categories', newCategory).then(category => {
+            resolve(category)
         }).catch(err => {
             reject(err);
         });

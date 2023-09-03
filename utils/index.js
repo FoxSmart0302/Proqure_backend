@@ -48,3 +48,7 @@ exports.getCurrentFormatedDate = () => {
     return moment(new Date()).format("yyyy-MM-DD HH:mm:ss");
 }
 
+exports.getFormatedDate = (date) => {
+    return moment(date).format("yyyy-MM-DD");
+} 
+

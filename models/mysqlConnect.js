@@ -23,14 +23,18 @@ const query = (sql) => {
                 reject(err);
                 return;
             }
-            connection.query(sql, (err, results, fields) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                connection.release();
-                resolve(results);
-            });
+            try {
+                connection.query(sql, (err, results, fields) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    connection.release();
+                    resolve(results);
+                });
+            } catch (error) {
+                reject(error);
+            }
         });
     });
 };

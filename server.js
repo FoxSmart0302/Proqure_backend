@@ -4,7 +4,12 @@ const http = require('http');
 const cors = require("cors");
 const { query } = require("./models/mysqlConnect");
 const passport = require('./utils/passport');
+const bodyParser = require('body-parser');
+const fileUpload = require('express-fileupload');
+const path = require('path');
+var multer = require('multer');
 require("dotenv").config();
+// var upload = multer();
 app.use(cors());
 
 //create socket http server
@@ -17,16 +22,17 @@ const item = require('./routes/item');
 const category = require('./routes/category');
 const user = require("./routes/user");
 
-// const vendor = require('./routes/vendor');
 
 // admin 
-const transporter = require("./routes/transporter");
 const product = require('./routes/product');
 
 // middlewares
-app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
-app.use(express.static("public"));
+
+// app.use(upload.any());
+app.use(fileUpload());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static(path.resolve(__dirname, 'public')));
 
 
 
@@ -49,12 +55,10 @@ query('SELECT * from tbl_users')
 
 app.use('/api/payment', payment);
 app.use('/api/user', user);
-// app.use('/api/vendor', vendor);
 app.use('/api/category', category);
 app.use('/api/item', item);
 
 //admin
-app.use('/api/transporter', transporter);
 app.use('/api/product', product)
 
 

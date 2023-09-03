@@ -20,10 +20,10 @@ exports.findById = (id) => {
     })
 }
 
-exports.register = (newUser) => {
+exports.register = (newProduct) => {
     return new Promise((resolve, reject) => {
-        mysql.insertOne('tbl_products', newUser).then(user => {
-            resolve(user)
+        mysql.insertOne('tbl_products', newProduct).then(product => {
+            resolve(product)
         }).catch(err => {
             reject(err);
         });
