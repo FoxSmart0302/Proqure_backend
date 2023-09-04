@@ -42,7 +42,7 @@ exports.register = (req, res) => {
     let uploadPath = null;
     const addProduct = () => {
         const newProduct = {
-            cat_id, name, price, size, quality, description, details, receive_date, expiry_date
+            cat_id, name, price, size, quality, description:description.replace(`'`, `\\'`), details: details.replace(`'`, `\\'`), receive_date, expiry_date
         };
         if (uploadPath) {
             newProduct.image = filePath;
@@ -50,12 +50,13 @@ exports.register = (req, res) => {
 
         newProduct.created_at = getCurrentFormatedDate();
         newProduct.updated_at = newProduct.created_at;
-        Product.register(newProduct).then(product => {
-            // ioHandler.sendNewProductEvent(product);
-            console.log("product", product)
+        let insertQuery = mysql.getInsertQuery('tbl_products', newProduct);
+        let selectQuery = `SELECT p.*, c.name as cat_name FROM tbl_categories as c INNER JOIN tbl_products as p ON c.id=p.cat_id WHERE c.deleted_at IS NULL AND p.deleted_at IS NULL;`;
+        mysql.query(`${insertQuery}${selectQuery}`).then(result => {
+            console.log("product", result)
             return res.json({
                 status: 0,
-                product,
+                result,
                 message:"Successfully registered"
             })
         }).catch(err => {
@@ -101,13 +102,11 @@ exports.edit = (req, res) => {
         let { id,category_id: cat_id, name, price, size, quality, description, details, receive_date, expiry_date } = req.body;
         receive_date= getFormatedDate(receive_date);
         expiry_date = getFormatedDate(expiry_date);
-        let selectQuery;
-        
-        selectQuery = mysql.selectQuery('tbl_products', {deleted_at: null});
-        
-        let  updateQuery = mysql.updateQuery('tbl_products', {id: id}, {cat_id: cat_id, name: name, price: price, size: size, quality: quality, description: description, details: details, receive_date: receive_date, expiry_date:expiry_date });
+
+        let selectQuery = `SELECT p.*, c.name as cat_name FROM tbl_categories as c INNER JOIN tbl_products as p ON c.id=p.cat_id WHERE c.deleted_at IS NULL AND p.deleted_at IS NULL;`;
+        let  updateQuery = mysql.updateQuery('tbl_products', {id: id}, {cat_id: cat_id, name: name, price: price, size: size, quality: quality, description: description.replace(`'`, `\\'`), details: details.replace(`'`, `\\'`), receive_date: receive_date, expiry_date:expiry_date });
         if(uploadPath) {
-            updateQuery = mysql.updateQuery('tbl_products', {id: id}, {cat_id: cat_id, name: name, price: price, size: size, quality: quality, description: description, details: details, receive_date: receive_date, expiry_date:expiry_date, image: filePath});
+            updateQuery = mysql.updateQuery('tbl_products', {id: id}, {cat_id: cat_id, name: name, price: price, size: size, quality: quality, description: description.replace(`'`, `\\'`), details: details.replace(`'`, `\\'`), receive_date: receive_date, expiry_date:expiry_date, image: filePath});
         }
 
         mysql.query(`${updateQuery}${selectQuery}`)
@@ -157,7 +156,7 @@ exports.delete = (req, res) => {
     let {id, company, firstname, lastname, phone, email } = req.body;
     let delete_at = getCurrentFormatedDate();
     let updateQuery = mysql.updateQuery('tbl_products', {id: id}, {deleted_at: delete_at});
-    let selectQuery = mysql.selectQuery('tbl_products', {deleted_at: null});
+    let selectQuery = `SELECT p.*, c.name as cat_name FROM tbl_categories as c INNER JOIN tbl_products as p ON c.id=p.cat_id WHERE c.deleted_at IS NULL AND p.deleted_at IS NULL;`;
     console.log(updateQuery)
     mysql.query(`${updateQuery}${selectQuery}`)
         .then(result => {
@@ -184,6 +183,12 @@ exports.list = (req, res) => {
         res.json({
             status: 0,
             products: products,
+        })
+    })
+    .catch(error => {
+        res.json({
+            status: 1,
+            error
         })
     })
 }

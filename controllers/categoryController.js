@@ -57,7 +57,7 @@ exports.itemlist = (req, res) => {
     console.log("==============itemList:", req.body);
     let data = req.data;
     let { user_id, user_email } = req.body;
-    let sql = `SELECT tbl_products.* from tbl_categories JOIN  tbl_products ON tbl_categories.id = tbl_products.cat_id ORDER BY tbl_categories.id;`;
+    let sql = `SELECT p.*, c.name as cat_name from tbl_categories as c JOIN  tbl_products as p ON c.id = p.cat_id ORDER BY c.id;`;
     sql += `SELECT * from tbl_categories ORDER BY id ASC;`;
     sql += `SELECT w.id, w.user_id, w.product_id,c.name as cat_name, p.name, p.price, p.image, p.description, p.details,p.created_at FROM tbl_wish as w INNER JOIN tbl_products as p ON w.product_id = p.id INNER JOIN tbl_categories as c ON c.id=p.cat_id WHERE w.user_id='${user_id}';`;
     sql += `SELECT ct.id, ct.user_id, ct.product_id,c.name as cat_name, p.name, p.price, p.image, p.description, p.details, ct.quantity, p.created_at FROM tbl_cart as ct INNER JOIN tbl_products as p ON ct.product_id = p.id INNER JOIN tbl_categories as c ON c.id=p.cat_id WHERE ct.user_id='${user_id}';`;
@@ -158,9 +158,9 @@ exports.edit = (req, res) => {
         let selectQuery;
         selectQuery = mysql.selectQuery('tbl_categories', {deleted_at: null});
         
-        let  updateQuery = mysql.updateQuery('tbl_categories', {id: id}, {name: name, description: description });
+        let  updateQuery = mysql.updateQuery('tbl_categories', {id: id}, {name: name, description: description.replace(`'`, `\\'`) });
         if(uploadPath) {
-            updateQuery = mysql.updateQuery('tbl_categories', {id: id}, {name: name, description: description, image: filePath });
+            updateQuery = mysql.updateQuery('tbl_categories', {id: id}, {name: name, description: description.replace(`'`, `\\'`), image: filePath });
         }
 
         mysql.query(`${updateQuery}${selectQuery}`)
@@ -209,8 +209,8 @@ exports.delete = (req, res) => {
     console.log("deletebody", req.body);
     let {id, company, firstname, lastname, phone, email } = req.body;
     let delete_at = getCurrentFormatedDate();
-    let updateQuery = mysql.updateQuery('tbl_products', {id: id}, {deleted_at: delete_at});
-    let selectQuery = mysql.selectQuery('tbl_products', {deleted_at: null});
+    let updateQuery = mysql.updateQuery('tbl_categories', {id: id}, {deleted_at: delete_at});
+    let selectQuery = mysql.selectQuery('tbl_categories', {deleted_at: null});
     console.log(updateQuery)
     mysql.query(`${updateQuery}${selectQuery}`)
         .then(result => {

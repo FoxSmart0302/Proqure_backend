@@ -30,43 +30,6 @@ const validate = (user, newUser = true) => {
     }
 }
 
-exports.login = (req, res) => {
-    let { email, password } = req.body;
-
-    let selectQuery = mysql.selectQuery("tbl_users", { email: email, deleted_at: null });
-
-    mysql.query(selectQuery).then(([user]) => {
-        if (!user) {
-            return res.json({
-                status: 1,
-                message: "Incorrect auth information."
-            })
-        }
-        bcrypt.compare(password, user.password).then(isMatched => {
-            if (!isMatched) throw ('password not matched');
-            const payload = { id: user.id };
-            const token = `Bearer ${jwt.sign(payload, 'secret', { expiresIn: 36000 })}`;
-            console.log(jwt.decode(token));
-            return res.json({
-                status: 0,
-                token,
-                user,
-            })
-        }).catch(err => {
-            console.log(err);
-            return res.json({
-                status: 1,
-                message: "Incorrect auth information."
-            })
-        })
-    }).catch(err => {
-        console.log(err);
-        return res.json({
-            status: 1,
-            message: "Please try again later."
-        })
-    });
-}
 
 exports.register = (req, res) => {
     const { isValid, errors } = validate(req.body);
@@ -79,7 +42,7 @@ exports.register = (req, res) => {
     console.log("register", req.body);
     // return
     
-    let { firstname, lastname, company, phone, email, password, role } = req.body;
+    let { firstname, lastname, company, phone, email, password, role, segment_id } = req.body;
 
     User.findByEmail(email).then(user => {
         if (user)
@@ -92,9 +55,12 @@ exports.register = (req, res) => {
         let uploadPath = null;
 
         const addUser = () => {
-            const newUser = {
+            let newUser = {
                 firstname, lastname, company, phone, email, password, role
             };
+            if(segment_id){
+                newUser.segment_id = segment_id;
+            }
             if (uploadPath) {
                 newUser.avatar = filePath;
             }
@@ -104,11 +70,13 @@ exports.register = (req, res) => {
                 newUser.created_at = getCurrentFormatedDate();
                 newUser.updated_at = newUser.created_at;
                 newUser.login_status = 0;
-                User.register(newUser).then(user => {
-                    // ioHandler.sendNewUserEvent(user);
+                let selectQuery = 'SELECT u.*, s.name as segment_name from tbl_users as u LEFT JOIN tbl_segment as s ON u.segment_id=s.id WHERE u.role=4 and u.deleted_at IS NULL and s.deleted_at is NULL;';
+                let insertQuery = mysql.getInsertQuery('tbl_users', newUser);
+               
+                mysql.query(`${insertQuery}${selectQuery}`).then(result => {
                     return res.json({
                         status: 0,
-                        user,
+                        result,
                         message:"Successfully registered"
                     })
                 }).catch(err => {
@@ -165,21 +133,23 @@ exports.edit = (req, res) => {
     let fileName = null;
     let uploadPath = null;
     const editUser = () => {
-        let {id, company, firstname, lastname, phone, email, role } = req.body;
-        let selectQuery;
-       
-        if ( role === 'all') {
-            selectQuery = mysql.selectQuery('tbl_users', {deleted_at: null});
+        let {id, company, firstname, lastname, phone, email, role, segment_id } = req.body;
+      
+        let selectQuery = 'SELECT u.*, s.name as segment_name from tbl_users as u LEFT JOIN tbl_segment as s ON u.segment_id=s.id WHERE u.role=4 and u.deleted_at IS NULL and s.deleted_at is NULL;'; 
+        let updateData = {company: company, firstname: firstname, lastname: lastname, phone: phone, email: email};
+        if(segment_id){
+            updateData.segment_id = segment_id;
         }
         else{
-            selectQuery = mysql.selectQuery('tbl_users', {deleted_at: null, role: role});
+            updateData.segment_id = ''
         }
-       
-        let updateQuery = mysql.updateQuery('tbl_users', {id: id}, {company: company, firstname: firstname, lastname: lastname, phone: phone, email: email});
         if(uploadPath) {
-            updateQuery = mysql.updateQuery('tbl_users', {id: id}, {company: company, firstname: firstname, lastname: lastname, phone: phone, email: email, avatar: filePath});
+            updateData.avatar = filePath;
         }
-
+        if(segment_id){
+            updateData.segment_id = segment_id
+        }
+        let updateQuery = mysql.updateQuery('tbl_users', {id: id}, updateData);
         mysql.query(`${updateQuery}${selectQuery}`)
             .then(result => {
                 return res.json({
@@ -225,15 +195,12 @@ exports.edit = (req, res) => {
 exports.delete = (req, res) => {
     console.log("deletebody", req.body);
     let {id, company, firstname, lastname, phone, email, role } = req.body;
-    let delete_at = getCurrentFormatedDate();
-    let selectQuery;
-    let updateQuery = mysql.updateQuery('tbl_users', {id: id}, {deleted_at: delete_at});
-    if( role == 'all' ) {
-        selectQuery = mysql.selectQuery('tbl_users', {deleted_at: null});
-    }else{
-        selectQuery = mysql.selectQuery('tbl_users', {deleted_at: null, role: role});
-    }
+    let deleted_at = getCurrentFormatedDate();
+ 
+    let updateQuery = mysql.updateQuery('tbl_users', {id: id}, {deleted_at: deleted_at});
+    let selectQuery = 'SELECT u.*, s.name as segment_name from tbl_users as u LEFT JOIN tbl_segment as s ON u.segment_id=s.id WHERE u.role=4 and u.deleted_at IS NULL and s.deleted_at is NULL;';
     console.log(updateQuery)
+ 
     mysql.query(`${updateQuery}${selectQuery}`)
         .then(result => {
             console.log(result)
@@ -258,17 +225,9 @@ exports.current = (req, res) => {
     })
 }
 
-exports.userlist = (req, res) => {
-    let { role } = req.body;
-    let usersQuery;
-    if(role == "all"){
-        usersQuery = mysql.selectQuery("tbl_users", { deleted_at: null });
-    }
-    else{
-        usersQuery = mysql.selectQuery("tbl_users", { deleted_at: null, role: role });
-    }
-    console.log(role)
-    mysql.query(usersQuery).then((users) => {
+exports.clientlist = (req, res) => {
+    let selectQuery = 'SELECT u.*, s.name as segment_name from tbl_users as u LEFT JOIN tbl_segment as s ON u.segment_id=s.id WHERE u.role=4 and u.deleted_at IS NULL and s.deleted_at is NULL;';
+    mysql.query(selectQuery).then((users) => {
         res.json({
             status: 0,
             users: users,

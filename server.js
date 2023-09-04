@@ -21,10 +21,13 @@ const payment = require("./routes/payment");
 const item = require('./routes/item');
 const category = require('./routes/category');
 const user = require("./routes/user");
-
+const client = require("./routes/client");
 
 // admin 
 const product = require('./routes/product');
+const coupon = require('./routes/coupon');
+const notification = require('./routes/notification');
+const segment = require('./routes/segment');
 
 // middlewares
 
@@ -57,11 +60,12 @@ app.use('/api/payment', payment);
 app.use('/api/user', user);
 app.use('/api/category', category);
 app.use('/api/item', item);
-
+app.use('/api/segment', segment);
 //admin
+app.use('/api/client', client);
 app.use('/api/product', product)
-
-
+app.use('/api/coupon', coupon)
+app.use('/api/notification', notification)
 // const server = require('http').createServer(app);
 const httpServer = http.createServer(app);
 const io = require('socket.io')(httpServer);
