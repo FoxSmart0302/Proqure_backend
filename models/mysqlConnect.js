@@ -20,6 +20,7 @@ const query = (sql) => {
     return new Promise((resolve, reject) => {
         pool.getConnection(function (err, connection) {
             if (err) {
+                console.log(err);
                 reject(err);
                 return;
             }
@@ -33,6 +34,7 @@ const query = (sql) => {
                     resolve(results);
                 });
             } catch (error) {
+                console.log(error);
                 reject(error);
             }
         });

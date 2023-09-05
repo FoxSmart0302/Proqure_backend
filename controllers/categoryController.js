@@ -61,9 +61,10 @@ exports.itemlist = (req, res) => {
     sql += `SELECT * from tbl_categories ORDER BY id ASC;`;
     sql += `SELECT w.id, w.user_id, w.product_id,c.name as cat_name, p.name, p.price, p.image, p.description, p.details,p.created_at FROM tbl_wish as w INNER JOIN tbl_products as p ON w.product_id = p.id INNER JOIN tbl_categories as c ON c.id=p.cat_id WHERE w.user_id='${user_id}';`;
     sql += `SELECT ct.id, ct.user_id, ct.product_id,c.name as cat_name, p.name, p.price, p.image, p.description, p.details, ct.quantity, p.created_at FROM tbl_cart as ct INNER JOIN tbl_products as p ON ct.product_id = p.id INNER JOIN tbl_categories as c ON c.id=p.cat_id WHERE ct.user_id='${user_id}';`;
+    sql += `SELECT * from tbl_message WHERE is_read='0' AND user_id='${user_id}';`;
     console.log("=======sql", sql);
 
-    mysql.query(sql).then(([list, clist, wishlist, cartlist]) => {
+    mysql.query(sql).then(([list, clist, wishlist, cartlist, messagelist]) => {
         const sortedArray = list.reduce((acc, curr) => {
             const foundIndex = acc.findIndex(item => item.cat_id === curr.cat_id);
             if (foundIndex !== -1) {
@@ -79,6 +80,7 @@ exports.itemlist = (req, res) => {
             clist,
             wishlist,
             cartlist,
+            messagelist,
             sortedArray,
         })
     }).catch(err => {

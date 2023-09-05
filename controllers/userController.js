@@ -33,8 +33,8 @@ const validate = (user, newUser = true) => {
 exports.login = (req, res) => {
     let { email, password } = req.body;
 
-    let selectQuery = mysql.selectQuery("tbl_users", { email: email, deleted_at: null });
-
+    let selectQuery = mysql.selectQuery("tbl_users", { email: email, deleted_at: null, status: 2 });
+    console.log("selectQuery", selectQuery);
     mysql.query(selectQuery).then(([user]) => {
         if (!user) {
             return res.json({
@@ -79,7 +79,7 @@ exports.register = (req, res) => {
     console.log("register", req.body);
     // return
     
-    let { firstname, lastname, company, phone, email, password, role } = req.body;
+    let { firstname, lastname, company, phone, email, password, role, status } = req.body;
 
     User.findByEmail(email).then(user => {
         if (user)
@@ -93,7 +93,7 @@ exports.register = (req, res) => {
 
         const addUser = () => {
             const newUser = {
-                firstname, lastname, company, phone, email, password, role
+                firstname, lastname, company, phone, email, password, role, status
             };
             if (uploadPath) {
                 newUser.avatar = filePath;
@@ -165,19 +165,20 @@ exports.edit = (req, res) => {
     let fileName = null;
     let uploadPath = null;
     const editUser = () => {
-        let {id, company, firstname, lastname, phone, email, role } = req.body;
+        let {id, company, firstname, lastname, phone, email, role, status, admin_role } = req.body;
         let selectQuery;
        
-        if ( role === 'all') {
+        if ( admin_role === 'all') {
             selectQuery = mysql.selectQuery('tbl_users', {deleted_at: null});
         }
         else{
             selectQuery = mysql.selectQuery('tbl_users', {deleted_at: null, role: role});
         }
-       
-        let updateQuery = mysql.updateQuery('tbl_users', {id: id}, {company: company, firstname: firstname, lastname: lastname, phone: phone, email: email});
+        let updateData = {company: company, firstname: firstname, lastname: lastname, phone: phone, email: email, role: role, status, status};
+        let updateQuery = mysql.updateQuery('tbl_users', {id: id}, updateData);
         if(uploadPath) {
-            updateQuery = mysql.updateQuery('tbl_users', {id: id}, {company: company, firstname: firstname, lastname: lastname, phone: phone, email: email, avatar: filePath});
+            updateData.avatar = filePath;
+            updateQuery = mysql.updateQuery('tbl_users', {id: id}, updateData);
         }
 
         mysql.query(`${updateQuery}${selectQuery}`)
@@ -220,6 +221,38 @@ exports.edit = (req, res) => {
     } else {
         editUser();
     }
+}
+
+exports.changestatus = (req, res) => {
+    console.log("editreqbody", req.body);
+    let fileName = null;
+    let uploadPath = null;
+    let {id, status, role, admin_role } = req.body;
+    let selectQuery;
+   
+    if ( admin_role === 'all') {
+        selectQuery = mysql.selectQuery('tbl_users', {deleted_at: null});
+    }
+    else{
+        selectQuery = mysql.selectQuery('tbl_users', {deleted_at: null, role: role});
+    }
+    let updateData = { status: status };
+    let updateQuery = mysql.updateQuery('tbl_users', {id: id}, updateData);
+    console.log("updatereqbody", updateQuery)
+    mysql.query(`${updateQuery}${selectQuery}`)
+        .then(result => {
+            return res.json({
+                status: 0,
+                message: 'Successfully updated',
+                result
+            })
+        })
+        .catch((err) => {
+            return res.json({
+                status: 1,
+                message: "Please try again later"
+            })
+        })
 }
 
 exports.delete = (req, res) => {

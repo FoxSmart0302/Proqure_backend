@@ -11,5 +11,6 @@ router.post('/userlist', userController.userlist);
 router.get('/current', passport.authenticate('jwt', { session: false }), userController.current);
 router.post('/edit', passport.authenticate('jwt', { session: false }), userController.edit);
 router.post('/delete', passport.authenticate('jwt', { session: false }), userController.delete);
+router.post('/changestatus', passport.authenticate('jwt', { session: false }), userController.changestatus);
 
 module.exports = router;
