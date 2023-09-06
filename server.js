@@ -26,9 +26,10 @@ const client = require("./routes/client");
 // admin 
 const product = require('./routes/product');
 const coupon = require('./routes/coupon');
-const notification = require('./routes/notification');
+const sent = require('./routes/sent');
+const inbox = require('./routes/inbox');
 const segment = require('./routes/segment');
-
+const order = require('./routes/order');
 // middlewares
 
 // app.use(upload.any());
@@ -61,11 +62,14 @@ app.use('/api/user', user);
 app.use('/api/category', category);
 app.use('/api/item', item);
 app.use('/api/segment', segment);
+
 //admin
 app.use('/api/client', client);
 app.use('/api/product', product)
 app.use('/api/coupon', coupon)
-app.use('/api/notification', notification)
+app.use('/api/sent', sent)
+app.use('/api/inbox', inbox)
+app.use('/api/order', order)
 // const server = require('http').createServer(app);
 const httpServer = http.createServer(app);
 const io = require('socket.io')(httpServer);
