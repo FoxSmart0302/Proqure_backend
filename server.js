@@ -23,6 +23,8 @@ const category = require('./routes/category');
 const user = require("./routes/user");
 const client = require("./routes/client");
 
+//ai chatbot
+const ai = require('./routes/ai');
 // admin 
 const product = require('./routes/product');
 const coupon = require('./routes/coupon');
@@ -63,6 +65,8 @@ app.use('/api/category', category);
 app.use('/api/item', item);
 app.use('/api/segment', segment);
 
+//ai chatbot
+app.use('/api/ai', ai);
 //admin
 app.use('/api/client', client);
 app.use('/api/product', product)
